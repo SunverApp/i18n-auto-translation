@@ -21,16 +21,20 @@ export class DeepLProAPI extends Translate {
   }
 
   protected callTranslateAPI = async (valuesForTranslation: string[]): Promise<string> => {
-    const response = await axios.post(
-      `https://${DeepLProAPI.endpoint}/v2/translate`,
-      {
-        text: [encode(valuesForTranslation.join(Translate.sentenceDelimiter))],
-        target_lang: argv.to,
-        source_lang: argv.from,
-        preserve_formatting: true,
-      },
-      DeepLProAPI.axiosConfig,
-    );
-    return decode((response as DeepLTranslateResponse).data.translations[0].text);
+    const res = [];
+    for (const v of valuesForTranslation) {
+      const response = await axios.post(
+        `https://${DeepLProAPI.endpoint}/v2/translate`,
+        {
+          text: [encode(v)],
+          target_lang: argv.to,
+          source_lang: argv.from,
+          preserve_formatting: true,
+        },
+        DeepLProAPI.axiosConfig,
+      );
+      res.push(decode((response as DeepLTranslateResponse).data.translations[0].text));
+    }
+    return res.join(Translate.sentenceDelimiter);
   };
 }
